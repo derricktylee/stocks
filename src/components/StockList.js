@@ -1,5 +1,7 @@
 import React from 'react'
 import { useGlobalContext } from '../Context'
+import {BsFillCaretUpFill, BsFillCaretDownFill} from "react-icons/bs"
+import { Link } from 'react-router-dom'
 
 export default function StockList() {
 
@@ -20,14 +22,20 @@ export default function StockList() {
           </tr>
           </thead>
           <tbody>
-            {stocks.map((stock)=>{
+            {stocks&&stocks.map((stock)=>{
               const {c,d,dp,h,l,o,pc} = stock.data
               return(
                 <tr className='table-row' key={stock.symbol}>
-                  <th scope='row'>{stock.symbol}</th>
+
+                  <th scope='row'>
+                    <Link to={`/detail/${stock.symbol}`} style={{textDecoration:"none", color:"black"}}>
+                      {stock.symbol}
+                  </Link>
+                  </th>
+
                   <td>{c}</td>
-                  <td className={`text-${d>0?'success':'danger'}`}>{d}</td>
-                  <td className={`text-${d>0?'success':'danger'}`}>{dp}</td>
+                  <td className={`text-${d>0?'success':'danger'}`}>{d}{d>0?<BsFillCaretUpFill/>:<BsFillCaretDownFill/>}</td>
+                  <td className={`text-${d>0?'success':'danger'}`}>{dp}{d>0?<BsFillCaretUpFill/>:<BsFillCaretDownFill/>}</td>
                   <td>{h}</td>
                   <td>{l}</td>
                   <td>{o}</td>
