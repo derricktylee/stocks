@@ -59,7 +59,7 @@ export function AppProvider({children}){
         else{
             setSearchResult([])
         }
-        console.log(searchResult)
+
     }
     ,[search])
 
@@ -87,7 +87,7 @@ export function AppProvider({children}){
         return e.t.map((el,index)=>{
             return({
                 x:el*1000,
-                y:e.c[index]
+                y: Math.round(e.c[index]*100)/100
             })
         })
     }
@@ -99,14 +99,16 @@ export function AppProvider({children}){
                 fetch(stockUrl+stock+"&resolution=60&from="+oneWeek+"&to="+currentTime+token).then(resp=>resp.json()),
                 fetch(stockUrl+stock+"&resolution=W&from="+oneYear+"&to="+currentTime+token).then(resp=>resp.json())
             ])  
+            
 
             setStockPrice(
                 [
-                    {day:formateData(res[0])},
-                    {week:formateData(res[1])},
-                    {year:formateData(res[2])}
+                    {day:formateData(res[0]),
+                    week:formateData(res[1]),
+                    year:formateData(res[2])}
                 ]
             )
+
 
         } catch (error) {
             console.log(error)
@@ -117,16 +119,16 @@ export function AppProvider({children}){
 
     useEffect(()=>{
         fetchStock()
-        console.log(stockPrice)
+
 
     },
 
     [stock])
-
+    
 
 
     return(
-        <AppContext.Provider value={{stocks,search,searchOnchange,searchResult, onClickSearch, setStock}}>{children}</AppContext.Provider>
+        <AppContext.Provider value={{stocks,search,searchOnchange,searchResult, onClickSearch, setStock, stockPrice,stock}}>{children}</AppContext.Provider>
     )
 }
 
