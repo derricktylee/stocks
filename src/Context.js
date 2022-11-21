@@ -7,10 +7,10 @@ const AppContext = createContext()
 export function AppProvider({children}){
     const [searchResult, setSearchResult] = useState([])
     const [search, setSearch] = useState("")
-    const [watchList, setWatchList] = useState(["AAPL","MSFT","TSLA"])
+    const [watchList, setWatchList] = useState(JSON.parse(localStorage.getItem("stocks")).length?JSON.parse(localStorage.getItem("stocks")):["AAPL","MSFT","TSLA"])
     const [stocks, setStocks] = useState([])
-    const[stock, setStock] = useState("")
-    const [stockPrice, setStockPrice] = useState([{day:""},{week:""},{year:""}])
+    const[stock, setStock] = useState("AAPL")
+    const [stockPrice, setStockPrice] = useState([{day:{x:0,y:0}},{week:{x:0,y:0}},{year:{x:0,y:0}}])
     const token = "&token=cdck2aiad3ic4dieblt0cdck2aiad3ic4diebltg"
     const url = `https://finnhub.io/api/v1/quote?symbol=`
     const searchUrl = "https://finnhub.io/api/v1/search?q="
@@ -31,9 +31,13 @@ export function AppProvider({children}){
 
     }
 
+    useEffect(()=>{
+        localStorage.setItem("stocks",JSON.stringify(watchList))
+
+    },[watchList])
+
 
     useEffect(()=>{
-        console.log(stocks)
         fetchData()
     },[watchList])
 
@@ -78,7 +82,9 @@ export function AppProvider({children}){
      oneDay = currentTime-3*24*60*60}
     else if(date.getDay === 6){
      oneDay = currentTime-2*24*60*60
-    } else {oneDay = currentTime-24*60*60}
+    } else if(date.getDay===1 && date.getHours === 14)
+    {oneDay = currentTime- 4*24*60*60}
+    else{oneDay = currentTime - 24*60*60}
     const oneWeek = currentTime - 7*24*60*60
     const oneYear = currentTime - 365*24*60*60
 
@@ -94,11 +100,14 @@ export function AppProvider({children}){
 
     async function fetchStock(){
         try {
+            
             const res = await Promise.all([
                 fetch(stockUrl+stock+"&resolution=30&from="+oneDay+"&to="+currentTime+token).then(resp=>resp.json()),
                 fetch(stockUrl+stock+"&resolution=60&from="+oneWeek+"&to="+currentTime+token).then(resp=>resp.json()),
                 fetch(stockUrl+stock+"&resolution=W&from="+oneYear+"&to="+currentTime+token).then(resp=>resp.json())
             ])  
+
+            
             
 
             setStockPrice(
@@ -108,6 +117,8 @@ export function AppProvider({children}){
                     year:formateData(res[2])}
                 ]
             )
+      
+    
 
 
         } catch (error) {
@@ -119,16 +130,22 @@ export function AppProvider({children}){
 
     useEffect(()=>{
         fetchStock()
-
-
     },
 
     [stock])
+
+    function removeStock(e){
+        setWatchList(prevWatchList=>{
+            const newList = prevWatchList.filter(list=>list!==e.target.id)
+            return newList
+        })
+        
+    }
     
 
 
     return(
-        <AppContext.Provider value={{stocks,search,searchOnchange,searchResult, onClickSearch, setStock, stockPrice,stock}}>{children}</AppContext.Provider>
+        <AppContext.Provider value={{stocks,search,searchOnchange,searchResult, onClickSearch, setStock, stockPrice,stock, removeStock}}>{children}</AppContext.Provider>
     )
 }
 

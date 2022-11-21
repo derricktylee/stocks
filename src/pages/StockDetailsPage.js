@@ -5,7 +5,8 @@ import StockChart from '../components/StockChart'
 
 export default function StockDetailsPage() {
   const {symbol} = useParams()
-  const{setStock, stockPrice} = useGlobalContext()
+  const{setStock, stockPrice,stock} = useGlobalContext()
+
   useEffect(()=>{
     setStock(symbol)
   },[symbol])

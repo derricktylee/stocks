@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Chart from "react-apexcharts"
 import { useGlobalContext } from '../Context'
 
@@ -6,6 +6,7 @@ export default function StockChart(props) {
     const {stockPrice, stock} = useGlobalContext()
     const{day, week, year} = stockPrice[0]
     const [dateFormat, setDateFormat] = useState("24h")
+
 
     function determineTimeFormat (){
         switch(dateFormat){
@@ -15,9 +16,13 @@ export default function StockChart(props) {
             default: return day
         }
     }
-
-    const color = determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419"
-    console.log(color)
+    const [color, setColor] = useState()
+    useEffect(()=>{
+        console.log(stockPrice)
+        setColor(determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419")
+    },[dateFormat])
+    // const color = determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419"
+    
 
 
     const option = {

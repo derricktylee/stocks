@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 export default function StockList() {
 
-    const {stocks} = useGlobalContext()
+    const {stocks, removeStock, setStock} = useGlobalContext()
   return (
     <div>
       <table className='table hover mt-5'>
@@ -28,7 +28,7 @@ export default function StockList() {
                 <tr className='table-row' key={stock.symbol}>
 
                   <th scope='row'>
-                    <Link to={`/detail/${stock.symbol}`} style={{textDecoration:"none", color:"black"}}>
+                    <Link to={`/detail/${stock.symbol}`} style={{textDecoration:"none", color:"black"}} >
                       {stock.symbol}
                   </Link>
                   </th>
@@ -39,7 +39,8 @@ export default function StockList() {
                   <td>{h}</td>
                   <td>{l}</td>
                   <td>{o}</td>
-                  <td>{pc}</td>
+                  <td>{pc}<button className='btn btn-danger btn-sm ml-3 d-inline-block delete-btn' onClick={removeStock} id={stock.symbol}>Remove</button></td>
+
                 </tr>
               )
             })}
