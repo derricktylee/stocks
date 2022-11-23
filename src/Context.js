@@ -9,27 +9,13 @@ export function AppProvider({children}){
     const [search, setSearch] = useState("")
     const [watchList, setWatchList] = useState(JSON.parse(localStorage.getItem("stocks")).length?JSON.parse(localStorage.getItem("stocks")):["AAPL","MSFT","TSLA"])
     const [stocks, setStocks] = useState([])
-    const[stock, setStock] = useState("AAPL")
+    const[stock, setStock] = useState("")
     const [stockPrice, setStockPrice] = useState([{day:{x:0,y:0}},{week:{x:0,y:0}},{year:{x:0,y:0}}])
     const token = "&token=cdck2aiad3ic4dieblt0cdck2aiad3ic4diebltg"
     const url = `https://finnhub.io/api/v1/quote?symbol=`
     const searchUrl = "https://finnhub.io/api/v1/search?q="
     const stockUrl = "https://finnhub.io/api/v1/stock/candle?symbol="
-    async function fetchData(){
-        try {
-            
-            const data = await Promise.all(watchList.map(async stock=>{
-                const res = await fetch(url+stock+token)
-                const data = await res.json()
-                return {symbol:stock,data:data}
-            }))
-
-            setStocks(data)
-        } catch (error) {
-            console.log(error)
-        }
-
-    }
+   
 
     useEffect(()=>{
         localStorage.setItem("stocks",JSON.stringify(watchList))
@@ -38,7 +24,25 @@ export function AppProvider({children}){
 
 
     useEffect(()=>{
-        fetchData()
+        let isFetching = true
+        async function fetchData(){
+
+            try {
+                
+
+                const data = await Promise.all(watchList.map(async stock=>{
+                    const res = await fetch(url+stock+token)
+                    const data = await res.json()
+                    return {symbol:stock,data:data}
+                }))
+    
+                if(isFetching){setStocks(data)}
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchData() 
+        return ()=>{isFetching=false}
     },[watchList])
 
     function searchOnchange(e){
@@ -46,23 +50,25 @@ export function AppProvider({children}){
 
     }
 
-    async function fetchSearchData(){
-
-        try { const res = await fetch(searchUrl+search+token)
-            const data = await res.json()
-            setSearchResult(data.result)
-            
-            
-        } catch (error) {
-            console.log(error)
-        }}
+    
 
     useEffect(()=>{
+        let isFetching = true
+        async function fetchSearchData(){
+
+            try { const res = await fetch(searchUrl+search+token)
+                const data = await res.json()
+                if(isFetching){setSearchResult(data.result)}
+                
+                
+            } catch (error) {
+                console.log(error)
+            }}
         if(search.length>0){
         fetchSearchData()}
         else{
             setSearchResult([])
-        }
+        } return()=>{isFetching=false}
 
     }
     ,[search])
@@ -98,40 +104,35 @@ export function AppProvider({children}){
         })
     }
 
-    async function fetchStock(){
-        try {
-            
-            const res = await Promise.all([
-                fetch(stockUrl+stock+"&resolution=30&from="+oneDay+"&to="+currentTime+token).then(resp=>resp.json()),
-                fetch(stockUrl+stock+"&resolution=60&from="+oneWeek+"&to="+currentTime+token).then(resp=>resp.json()),
-                fetch(stockUrl+stock+"&resolution=W&from="+oneYear+"&to="+currentTime+token).then(resp=>resp.json())
-            ])  
-
-            
-            
-
-            setStockPrice(
-                [
-                    {day:formateData(res[0]),
-                    week:formateData(res[1]),
-                    year:formateData(res[2])}
-                ]
-            )
-      
-    
-
-
-        } catch (error) {
-            console.log(error)
-        }
-      
-    }
 
 
     useEffect(()=>{
+        let isFetching = true
+        async function fetchStock(){
+            try {
+                
+                const res = await Promise.all([
+                    fetch(stockUrl+stock+"&resolution=30&from="+oneDay+"&to="+currentTime+token).then(resp=>resp.json()),
+                    fetch(stockUrl+stock+"&resolution=60&from="+oneWeek+"&to="+currentTime+token).then(resp=>resp.json()),
+                    fetch(stockUrl+stock+"&resolution=W&from="+oneYear+"&to="+currentTime+token).then(resp=>resp.json())
+                ])     
+    
+                if(isFetching){setStockPrice(
+                    [
+                        {day:formateData(res[0]),
+                        week:formateData(res[1]),
+                        year:formateData(res[2])}
+                    ]
+                )}
+    
+            } catch (error) {
+                console.log(error)
+            }   
+        }
         fetchStock()
+        return()=>{isFetching = false}
+    
     },
-
     [stock])
 
     function removeStock(e){

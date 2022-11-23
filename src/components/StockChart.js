@@ -7,7 +7,6 @@ export default function StockChart(props) {
     const{day, week, year} = stockPrice[0]
     const [dateFormat, setDateFormat] = useState("24h")
 
-
     function determineTimeFormat (){
         switch(dateFormat){
             case "24h": return day
@@ -19,7 +18,7 @@ export default function StockChart(props) {
     const [color, setColor] = useState()
     useEffect(()=>{
         console.log(stockPrice)
-        setColor(determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419")
+        stock&&setColor(determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419")
     },[dateFormat])
     // const color = determineTimeFormat().slice(-1)[0].y - determineTimeFormat()[0].y > 0 ?"#26C281":"#ed3419"
     
